@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, TextInput, StyleSheet } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 
 const CaixaOpiniaoEmojis = () => {
   const [sentimento, setSentimento] = useState('');
   const [comentario, setComentario] = useState('');
+  const navigation = useNavigation();
 
   const emojis = [
     { emoji: '😠', label: 'Péssimo', value: 'pessimo' },
@@ -15,8 +18,11 @@ const CaixaOpiniaoEmojis = () => {
 
   return (
     <View style={styles.container}>
+            <TouchableOpacity style={styles.botaoVoltar} onPress={() => navigation.goBack()}>
+              <Ionicons name="arrow-back" size={30} color="#000" />
+            </TouchableOpacity>
+            
       <Text style={styles.titulo}>Como foi sua experiência?</Text>
-      
       <Text style={styles.label}>Selecione seu sentimento:</Text>
       <View style={styles.emojisContainer}>
         {emojis.map((item) => (
@@ -67,6 +73,7 @@ const styles = StyleSheet.create({
     padding: 20,
     borderRadius: 15,
     margin: 10,
+    marginTop: 50
   },
   titulo: {
     fontSize: 22,
@@ -132,6 +139,11 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  botaoVoltar: { 
+    position: 'absolute', 
+    top: 20, 
+    left: 15 
   },
 });
 
