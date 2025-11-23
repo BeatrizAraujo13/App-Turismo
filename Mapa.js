@@ -1,83 +1,79 @@
-import React, { useState } from 'react';
-import { StyleSheet, View, TouchableOpacity, Text, Linking, Alert } from 'react-native';
-import MapView, { Marker } from 'react-native-maps';
+import React from 'react';
+import { StyleSheet, View, Text, TouchableOpacity } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import { Ionicons } from '@expo/vector-icons';
 
-export default function MapaSimples() {
-  const [marcadores, setMarcadores] = useState([]);
-
-  // Adiciona marcador ao tocar
-  const handlePress = (event) => {
-    const { latitude, longitude } = event.nativeEvent.coordinate;
-    const novoMarcador = {
-      id: Date.now(),
-      latitude,
-      longitude,
-    };
-    setMarcadores([...marcadores, novoMarcador]);
-  };
-
-  // Abre o Google Maps com base no último marcador
-  const abrirNoGoogleMaps = () => {
-    if (marcadores.length === 0) {
-      Alert.alert('Aviso', 'Toque no mapa para adicionar um marcador primeiro!');
-      return;
-    }
-
-    const ultimo = marcadores[marcadores.length - 1];
-    const url = `https://www.google.com/maps?q=${ultimo.latitude},${ultimo.longitude}`;
-
-    Linking.openURL(url);
-  };
+export default function Mapa() {
+  const navigation = useNavigation();
 
   return (
     <View style={styles.container}>
-      <MapView
-        style={styles.map}
-        initialRegion={{
-          latitude: -8.2822,
-          longitude: -35.9734,
-          latitudeDelta: 0.05,
-          longitudeDelta: 0.05,
-        }}
-        onPress={handlePress}
-      >
-        {marcadores.map((marcador) => (
-          <Marker
-            key={marcador.id}
-            coordinate={{
-              latitude: marcador.latitude,
-              longitude: marcador.longitude,
-            }}
-            pinColor="red"
-          />
-        ))}
-      </MapView>
+      <Text style={styles.titulo}>Mapa</Text>
+      <Text style={styles.texto}>Aqui estará o mapa com todos os pontos e restaurantes.</Text>
 
-      <TouchableOpacity style={styles.botao} onPress={abrirNoGoogleMaps}>
-        <Text style={styles.botaoTexto}>Abrir no Google Maps</Text>
-      </TouchableOpacity>
+      <View style={styles.barra}>
+              <TouchableOpacity
+                style={styles.botaoItem}
+                onPress={() => navigation.navigate('Home')}
+              >
+                <Ionicons name="home" size={24} color="#000" />
+                <Text style={styles.botaoTextoBarra}>Início</Text>
+              </TouchableOpacity>
+      
+              <TouchableOpacity
+                style={styles.botaoItem}
+                onPress={() => navigation.navigate('Mapa')}
+              >
+                <Ionicons name="map" size={24} color="#000" />
+                <Text style={styles.botaoTextoBarra}>Mapa</Text>
+              </TouchableOpacity>
+      
+              <TouchableOpacity
+                style={styles.botaoItem}
+                onPress={() => navigation.navigate('Favoritos')}
+              >
+                <Ionicons name="heart" size={24} color="#000" />
+                <Text style={styles.botaoTextoBarra}>Favoritos</Text>
+              </TouchableOpacity>
+            </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
+  container: { 
+    flex: 1, 
+    justifyContent: 'center', 
+    alignItems: 'center', 
+    backgroundColor: '#fff' 
   },
-  map: {
-    width: '100%',
-    height: '90%',
+  titulo: { 
+    fontSize: 25, 
+    fontWeight: 'bold', 
+    color: '#000', 
+    marginBottom: 20 
   },
-  botao: {
-    backgroundColor: '#FB8837',
-    padding: 15,
-    borderRadius: 15,
+  texto: { 
+    fontSize: 18, 
+    color: '#333', 
+    textAlign: 'center', 
+    paddingHorizontal: 20 
+  },
+  barra: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
     alignItems: 'center',
-    margin: 10,
+    backgroundColor: '#FB8837',
+    width: '100%',
+    height: 90,
+    marginTop: 'auto',
   },
-  botaoTexto: {
-    color: '#000',
-    fontSize: 16,
-    fontWeight: 'bold',
+  botaoItem: { 
+    alignItems: 'center' 
   },
+  botaoTextoBarra: { 
+    fontSize: 12, 
+    color: '#000', 
+    marginTop: 3 
+  }
 });

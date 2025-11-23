@@ -1,80 +1,123 @@
-import React from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, TextInput, ScrollView } from 'react-native';
+import React, { useState } from 'react';
+import { StyleSheet, Text, View, TouchableOpacity, ScrollView, TextInput} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 
-export default function PontosTuristicos({ onVoltar }) {
-  const pontosTuristicos = [
-    { id: 1, nome: 'Alto do Moura', descricao: 'Maior centro de artes figurativas das Américas' },
-    { id: 2, nome: 'Feira de Caruaru', descricao: 'Uma das maiores feiras livres do mundo' },
-    { id: 3, nome: 'Pátio de Eventos', descricao: 'Local de grandes eventos e festas' },
-    { id: 4, nome: 'Museu do Barro', descricao: 'Museu de arte popular e cerâmica' },
+export default function PontosTuristicos() {
+  const navigation = useNavigation();
+
+  const pontos = [
+    { id: 1, nome: 'Praça Central', descricao: 'Local histórico de Caruaru' },
+    { id: 2, nome: 'Museu do Forró', descricao: 'Mostra a cultura musical' },
+    { id: 3, nome: 'Parque das Árvores', descricao: 'Espaço verde e lazer' },
+    { id: 4, nome: 'Feira de Artesanato', descricao: 'Artesanato regional' },
+    { id: 5, nome: 'Igreja Matriz', descricao: 'Construção histórica' },
+    { id: 6, nome: 'Teatro Municipal', descricao: 'Espaço cultural' },
+    { id: 7, nome: 'Estádio', descricao: 'Eventos esportivos' },
+    { id: 8, nome: 'Cachoeira', descricao: 'Turismo ecológico' },
   ];
+
+  const [favoritos, setFavoritos] = useState([]);
+  const [quantidade, setQuantidade] = useState(5);
+
+  const toggleFavorito = (id) => {
+    setFavoritos(prev =>
+      prev.includes(id) ? prev.filter(f => f !== id) : [...prev, id]
+    );
+  };
+
+  const carregarMais = () => {
+    setQuantidade(prev => prev + 4);
+  };
 
   return (
     <View style={styles.container}>
-      {/* HEADER ESPECÍFICO DOS PONTOS TURÍSTICOS */}
-      <View style={styles.header}>
-        <TouchableOpacity style={styles.botaoVoltar} onPress={onVoltar}>
+      <View style={styles.Topo}>
+        <TouchableOpacity style={styles.botaoVoltar} onPress={() => navigation.goBack()}>
           <Ionicons name="arrow-back" size={30} color="#000" />
         </TouchableOpacity>
         
         <Text style={styles.titulo}>Pontos Turísticos</Text>
-        
+
         <View style={styles.Pesquisar}>
-          <Ionicons name="search" size={20} color="#777" style={styles.searchIcon} />
           <TextInput
-            placeholder="Pesquisar pontos turísticos..."
-            placeholderTextColor="#555"
-            style={styles.input}
+              placeholder="O que você procura..."
+              placeholderTextColor="#555"
+              style={styles.input}
           />
-        </View>
+          <Ionicons name="search" size={20} color="#777" style={styles.searchIcon} />
+        </View>       
       </View>
 
-      {/* LISTA DE PONTOS TURÍSTICOS */}
       <ScrollView style={styles.listaContainer} contentContainerStyle={styles.listaConteudo}>
-        {pontosTuristicos.map((ponto) => (
-          <View key={ponto.id} style={styles.cardPonto}>
+        {pontos.slice(0, quantidade).map(ponto => (
+          <View key={ponto.id} style={styles.card}>
             <View style={styles.imagemPlaceholder}>
               <Ionicons name="location" size={40} color="#FB8837" />
             </View>
-            <View style={styles.infoPonto}>
-              <Text style={styles.nomePonto}>{ponto.nome}</Text>
-              <Text style={styles.descricaoPonto}>{ponto.descricao}</Text>
+            <View style={styles.info}>
+              <Text style={styles.nome}>{ponto.nome}</Text>
+              <Text style={styles.descricao}>{ponto.descricao}</Text>
             </View>
-            <TouchableOpacity style={styles.botaoFavorito}>
-              <Ionicons name="heart-outline" size={24} color="#FB8837" />
+            <TouchableOpacity style={styles.botaoFavorito} onPress={() => toggleFavorito(ponto.id)}>
+              <Ionicons
+                name={favoritos.includes(ponto.id) ? "heart" : "heart-outline"}
+                size={24}
+                color="#FB8837"
+              />
             </TouchableOpacity>
           </View>
         ))}
+
+        {quantidade < pontos.length && (
+          <TouchableOpacity style={styles.botaoMais} onPress={carregarMais}>
+            <Text style={styles.textoMais}>Ver mais</Text>
+          </TouchableOpacity>
+        )}
       </ScrollView>
+      <View style={styles.barra}>
+         <TouchableOpacity
+            style={styles.botaoItem}
+            onPress={() => navigation.navigate('Home')}
+          >
+          <Ionicons name="home" size={24} color="#000" />
+            <Text style={styles.botaoTextoBarra}>Início</Text>
+          </TouchableOpacity>
+      
+          <TouchableOpacity
+            style={styles.botaoItem}
+            onPress={() => navigation.navigate('Mapa')}
+          >
+          <Ionicons name="map" size={24} color="#000" />
+            <Text style={styles.botaoTextoBarra}>Mapa</Text>
+          </TouchableOpacity>
+      
+          <TouchableOpacity
+            style={styles.botaoItem}
+            onPress={() => navigation.navigate('Favoritos')}
+          >
+          <Ionicons name="heart" size={24} color="#000" />
+            <Text style={styles.botaoTextoBarra}>Favoritos</Text>
+          </TouchableOpacity>
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
+  container: { 
+    flex: 1, 
+    backgroundColor: '#fff' 
   },
-  header: {
+  Topo: {
+    width: '100%',
     backgroundColor: '#FB8837',
-    paddingTop: 60,
-    paddingBottom: 30,
     alignItems: 'center',
+    paddingTop: 50,
+    paddingBottom: 40,
     borderBottomLeftRadius: 100,
     borderBottomRightRadius: 100,
-  },
-  botaoVoltar: {
-    position: 'absolute',
-    top: 40,
-    left: 20,
-    zIndex: 1,
-  },
-  titulo: {
-    fontSize: 25,
-    fontWeight: 'bold',
-    color: '#000',
-    marginBottom: 15,
+    position: 'relative',
   },
   Pesquisar: {
     flexDirection: 'row',
@@ -88,59 +131,95 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
+    marginTop: 15,
   },
-  input: {
-    flex: 1,
-    fontStyle: 'italic',
-    color: '#333',
+  botaoVoltar: { 
+    position: 'absolute', 
+    top: 40, 
+    left: 20 
   },
-  searchIcon: {
-    marginRight: 5,
+  titulo: { 
+    fontSize: 25, 
+    fontWeight: 'bold', 
+    color: '#000',
+    marginTop: 5,
   },
-  listaContainer: {
-    flex: 1,
-    width: '100%',
+  searchIcon: { 
+    marginLeft: 5   
   },
-  listaConteudo: {
-    padding: 20,
-    paddingBottom: 100,
+  input: { 
+    flex: 1, 
+    fontStyle: 'italic', 
+    color: '#333'
   },
-  cardPonto: {
+  listaContainer: { 
+    flex: 1, 
+    width: '100%' 
+  },
+  listaConteudo: { 
+    padding: 20, 
+    paddingBottom: 100 
+  },
+  card: { 
+    flexDirection: 'row', 
+    backgroundColor: '#f8f8f8', 
+    borderRadius: 15, 
+    padding: 15, 
+    marginBottom: 15, 
+    alignItems: 'center', 
+    elevation: 3 
+  },
+  imagemPlaceholder: { 
+    width: 60, 
+    height: 60, 
+    borderRadius: 30, 
+    backgroundColor: '#fff', 
+    justifyContent: 'center', 
+    alignItems: 'center', 
+    marginRight: 15 
+  },
+  info: { 
+    flex: 1 
+  },
+  nome: { 
+    fontSize: 18, 
+    fontWeight: 'bold', 
+    color: '#333' 
+  },
+  descricao: { 
+    fontSize: 14, 
+    color: '#666' 
+  },
+  botaoFavorito: { 
+    padding: 5 
+  },
+  botaoMais: { 
+    backgroundColor: '#FB8837', 
+    paddingVertical: 12, 
+    paddingHorizontal: 18, 
+    borderRadius: 25, 
+    alignSelf: 'center', 
+  },
+  textoMais: { 
+    color: '#fff', 
+    fontWeight: 'bold', 
+    fontSize: 16 
+  },
+  barra: {
     flexDirection: 'row',
-    backgroundColor: '#f8f8f8',
-    borderRadius: 15,
-    padding: 15,
-    marginBottom: 15,
+    justifyContent: 'space-around',
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    backgroundColor: '#FB8837',
+    width: '100%',
+    height: 90,
+    marginTop: 'auto',
   },
-  imagemPlaceholder: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: '#fff',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 15,
+  botaoItem: { 
+    alignItems: 'center' 
   },
-  infoPonto: {
-    flex: 1,
-  },
-  nomePonto: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 5,
-  },
-  descricaoPonto: {
-    fontSize: 14,
-    color: '#666',
-  },
-  botaoFavorito: {
-    padding: 5,
-  },
+  botaoTextoBarra: { 
+    fontSize: 12, 
+    color: '#000', 
+    marginTop: 3
+  }
 });

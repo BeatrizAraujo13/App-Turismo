@@ -1,135 +1,93 @@
-import React, { useState } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, TextInput } from 'react-native';
+import React from 'react';
+import { StyleSheet, View, Text, TouchableOpacity, TextInput } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import PontosTuristicos from './PontosTuristicos.js';
-import Restaurantes from './Restaurantes.js';
-import Hospedagem from './Hospedagem.js';
-import Eventos from './Eventos.js';
-import Favoritos from './Favoritos.js';
-import Avaliar from './Avaliar.js';
-import Mapa from './Mapa.js';
 
-export default function App() {
-  const [telaAtual, setTelaAtual] = useState('home');
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
-  // TELA INICIAL 
-  if (telaAtual === 'home') {
-    return (
-        <View style={styles.container}>
-        {/* TOPO */}
-        <View style={styles.Topo}>
-          <Text style={styles.titulo}>VIVA CARUARU</Text>
+import Restaurantes from './Restaurantes';
+import Hospedagem from './Hospedagem';
+import PontosTuristicos from './PontosTuristicos';
+import Eventos from './Eventos';
+import Favoritos from './Favoritos';
+import Avaliar from './Avaliar';
+import Mapa from './Mapa';
 
-          <TouchableOpacity style={styles.menuSuperior}>
-            <Ionicons name="menu" size={30} color="#000" />
-          </TouchableOpacity>
+const Stack = createNativeStackNavigator();
 
-          <View style={styles.Pesquisar}>
-            <TextInput
-              placeholder="O que você procura..."
-              placeholderTextColor="#555"
-              style={styles.input}
-            />
-            <Ionicons name="search" size={20} color="#777" style={styles.searchIcon} />
-          </View>
-
-          <View style={styles.curva} />
-        </View>
-
-        {/* BOTÕES PRINCIPAIS */}
-        <View style={styles.buttonsContainer}>
-          <TouchableOpacity style={styles.botao} onPress={() => setTelaAtual('pontos')}>
-            <Text style={styles.botaoTextoPrincipal}>Pontos Turísticos</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.botao} onPress={() => setTelaAtual('restaurantes')}>
-            <Text style={styles.botaoTextoPrincipal}>Restaurantes</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.botao} onPress={() => setTelaAtual('hospedagem')}>
-            <Text style={styles.botaoTextoPrincipal}>Hospedagem</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.botao} onPress={() => setTelaAtual('eventos')}>
-            <Text style={styles.botaoTextoPrincipal}>Eventos</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.avaliar} onPress={() => setTelaAtual('avaliar')}>
-            <Text style={styles.avaliarTexto}>Avalia-nos</Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* BARRA INFERIOR */}
-        <View style={styles.barra}>
-          <TouchableOpacity 
-            style={styles.botaoItem} 
-            onPress={() => setTelaAtual('home')}
-          >
-            <Ionicons name="home" size={24} color="#000" />
-            <Text style={styles.botaoTextoBarra}>Início</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity 
-            style={styles.botaoItem}
-            onPress={() => setTelaAtual('mapa')}
-          >
-            <Ionicons name="map" size={24} color="#000" />
-            <Text style={styles.botaoTextoBarra}>Mapa</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity 
-            style={styles.botaoItem}
-            onPress={() => setTelaAtual('favoritos')}
-          >
-            <Ionicons name="heart" size={24} color="#000" />
-            <Text style={styles.botaoTextoBarra}>Favoritos</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    );
-  }
-
-  // OUTRAS TELAS
+function Home({ navigation }) {
   return (
     <View style={styles.container}>
-      {/* CONTEÚDO DAS TELAS */}
-      <View style={styles.conteudo}>
-        {telaAtual === 'pontos' && <PontosTuristicos onVoltar={() => setTelaAtual('home')} />}
-        {telaAtual === 'restaurantes' && (
-          <Restaurantes onVoltar={() => setTelaAtual('home')} />
-        )}
-        {telaAtual === 'hospedagem' && (
-          <Hospedagem onVoltar={() => setTelaAtual('home')} />
-        )}
-        {telaAtual === 'eventos' && (
-          <Eventos onVoltar={() => setTelaAtual('home')} />
-        )}
-        {telaAtual === 'favoritos' && (
-          <Favoritos onVoltar={() => setTelaAtual('home')} />
-        )}
-      {telaAtual === 'mapa' && (
-         <Mapa onVoltar={() => setTelaAtual('home')} />
-      )}
-      {telaAtual === 'avaliar' && (<Avaliar onVoltar={() => setTelaAtual('home')}/>)}
-    </View>
+      {/* TOPO */}
+      <View style={styles.Topo}>
+        <Text style={styles.titulo}>VIVA CARUARU</Text>
 
-      {/* BARRA INFERIOR DAS OUTRAS TELAS */}
+        <TouchableOpacity style={styles.menuSuperior}>
+          <Ionicons name="menu" size={30} color="#000" />
+        </TouchableOpacity>
+
+        <View style={styles.curva} />
+      </View>
+
+      {/* BOTÕES PRINCIPAIS */}
+      <View style={styles.buttonsContainer}>
+        <TouchableOpacity
+          style={styles.botao}
+          onPress={() => navigation.navigate('PontosTuristicos')}
+        >
+          <Text style={styles.botaoTextoPrincipal}>Pontos Turísticos</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.botao}
+          onPress={() => navigation.navigate('Restaurantes')}
+        >
+          <Text style={styles.botaoTextoPrincipal}>Comedorias</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.botao}
+          onPress={() => navigation.navigate('Hospedagem')}
+        >
+          <Text style={styles.botaoTextoPrincipal}>Hospedagem</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.botao}
+          onPress={() => navigation.navigate('Eventos')}
+        >
+          <Text style={styles.botaoTextoPrincipal}>Eventos</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.avaliar}
+          onPress={() => navigation.navigate('Avaliar')}
+        >
+          <Text style={styles.avaliarTexto}>Avalia-nos</Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* BARRA INFERIOR */}
       <View style={styles.barra}>
-        <TouchableOpacity 
-          style={styles.botaoItem} 
-          onPress={() => setTelaAtual('home')}
+        <TouchableOpacity
+          style={styles.botaoItem}
+          onPress={() => navigation.navigate('Home')}
         >
           <Ionicons name="home" size={24} color="#000" />
           <Text style={styles.botaoTextoBarra}>Início</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.botaoItem}
-          onPress={() => setTelaAtual('mapa')}
+          onPress={() => navigation.navigate('Mapa')}
         >
           <Ionicons name="map" size={24} color="#000" />
           <Text style={styles.botaoTextoBarra}>Mapa</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.botaoItem}
-          onPress={() => setTelaAtual('favoritos')}
+          onPress={() => navigation.navigate('Favoritos')}
         >
           <Ionicons name="heart" size={24} color="#000" />
           <Text style={styles.botaoTextoBarra}>Favoritos</Text>
@@ -139,48 +97,44 @@ export default function App() {
   );
 }
 
+export default function App() {
+  return (
+    <NavigationContainer>
+      <Stack.Navigator screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="Home" component={Home} />
+        <Stack.Screen name="PontosTuristicos" component={PontosTuristicos} />
+        <Stack.Screen name="Restaurantes" component={Restaurantes} />
+        <Stack.Screen name="Hospedagem" component={Hospedagem} />
+        <Stack.Screen name="Eventos" component={Eventos} />
+        <Stack.Screen name="Favoritos" component={Favoritos} />
+        <Stack.Screen name="Avaliar" component={Avaliar} />
+        <Stack.Screen name="Mapa" component={Mapa} />
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
+}
+
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
+  container: { 
+    flex: 1, 
+    backgroundColor: '#fff'
   },
   Topo: {
     width: '100%',
     backgroundColor: '#FB8837',
     alignItems: 'center',
     paddingTop: 50,
-    paddingBottom: 40, 
+    paddingBottom: 40,
     borderBottomLeftRadius: 100,
     borderBottomRightRadius: 100,
     position: 'relative',
   },
-  titulo: {
-    fontSize: 25,
-    fontWeight: 'bold',
+  titulo: { 
+    fontSize: 25, 
+    fontWeight: 'bold', 
     color: '#000',
-    marginBottom: 15,
-  },
-  Pesquisar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#fff',
-    borderRadius: 25,
-    width: '80%',
-    height: 40,
-    paddingHorizontal: 10,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  input: {
-    flex: 1,
-    fontStyle: 'italic',
-    color: '#333',
-  },
-  searchIcon: {
-    marginLeft: 5,
-  },
+     marginBottom: 20 
+    },
   curva: {
     position: 'absolute',
     bottom: -60,
@@ -191,10 +145,10 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: 200,
     zIndex: -1,
   },
-  buttonsContainer: {
-    marginTop: 80,
-    alignItems: 'center',
-    width: '100%',
+  buttonsContainer: { 
+    marginTop: 80, 
+    alignItems: 'center', 
+    width: '100%' 
   },
   botao: {
     backgroundColor: '#FB8837',
@@ -206,57 +160,10 @@ const styles = StyleSheet.create({
     marginVertical: 15,
     marginTop: 10,
   },
-  botaoVoltar: {
-    backgroundColor: '#FB8837',
-    width: '40%',
-    height: 50,
-    borderRadius: 25,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginVertical: 20,
-  },
-  botaoTextoPrincipal: {
-    color: '#191717',
-    fontSize: 25,
-    fontWeight: 'bold',
-  },
-  conteudo: {
-    flex: 1,
-    width: '100%',
-  },
-  telaPlaceholder: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
-  textoConteudo: {
-    fontSize: 20,
-    textAlign: 'center',
-    paddingHorizontal: 20,
-    marginTop: 20,
-  },
-  barra: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    backgroundColor: '#FB8837',
-    width: '100%',
-    height: 90,
-    marginTop: 'auto',
-  },
-  botaoItem: {
-    alignItems: 'center',
-  },
-  botaoTextoBarra: {
-    fontSize: 12,
-    color: '#000',
-    marginTop: 3,
-  },
-  menuSuperior: {
-    position: 'absolute',
-    top: 40,
-    left: 20,
+  botaoTextoPrincipal: { 
+    color: '#191717', 
+    fontSize: 25, 
+    fontWeight: 'bold' 
   },
   avaliar: {
     backgroundColor: '#FB8837',
@@ -267,13 +174,32 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginVertical: 15,
     marginTop: 30,
-    
   },
-  avaliarTexto: {
-    fontSize: 20,
-    textAlign: 'center',
-    marginTop: 'center',
-    fontWeight: 'bold',
-    color: '#000'
-  }
+  avaliarTexto: { 
+    fontSize: 20, 
+    fontWeight: 'bold', 
+    color: '#000' 
+  },
+  barra: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    backgroundColor: '#FB8837',
+    width: '100%',
+    height: 90,
+    marginTop: 'auto',
+  },
+  botaoItem: { 
+    alignItems: 'center' 
+  },
+  botaoTextoBarra: { 
+    fontSize: 12, 
+    color: '#000', 
+    marginTop: 3 
+  },
+  menuSuperior: { 
+    position: 'absolute', 
+    top: 40, 
+    left: 20 
+  },
 });
