@@ -43,19 +43,38 @@ export default function Eventos() {
 
       <ScrollView style={styles.listaContainer} contentContainerStyle={styles.listaConteudo}>
         {eventos.slice(0, quantidade).map(evento => (
-          <View key={evento.id} style={styles.card}>
-            <View style={styles.imagemPlaceholder}>
-              <Ionicons name="location" size={40} color="#FB8837" />
-            </View>
-            <View style={styles.info}>
-              <Text style={styles.nome}>{evento.nome}</Text>
-              <Text style={styles.descricao}>{evento.descricao}</Text>
-            </View>
-            <TouchableOpacity style={styles.botaoFavorito} onPress={() => toggleFavorito(evento.id)}>
-              <Ionicons name={favoritos.includes(evento.id) ? "heart" : "heart-outline"} size={24} color="#FB8837" />
-            </TouchableOpacity>
-          </View>
-        ))}
+  <TouchableOpacity
+    key={evento.id}
+    style={styles.card}
+    activeOpacity={0.8}
+    onPress={() => 
+      navigation.navigate("DetalhesItem", { 
+        item: evento, 
+        tipo: "evento" 
+      })
+    }
+  >
+    <View style={styles.imagemPlaceholder}>
+      <Ionicons name="calendar" size={40} color="#FB8837" />
+    </View>
+
+    <View style={styles.info}>
+      <Text style={styles.nome}>{evento.nome}</Text>
+      <Text style={styles.descricao}>{evento.descricao}</Text>
+    </View>
+
+    <TouchableOpacity 
+      style={styles.botaoFavorito} 
+      onPress={() => toggleFavorito(evento.id)}
+    >
+      <Ionicons
+        name={favoritos.includes(evento.id) ? "heart" : "heart-outline"}
+        size={24}
+        color="#FB8837"
+      />
+    </TouchableOpacity>
+  </TouchableOpacity>
+))}
 
         {quantidade < eventos.length && (
           <TouchableOpacity style={styles.botaoMais} onPress={carregarMais}>

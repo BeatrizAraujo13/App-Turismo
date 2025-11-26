@@ -45,28 +45,47 @@ export default function Restaurantes() {
         </View>
       </View>
 
-      <ScrollView style={styles.listaContainer} contentContainerStyle={styles.listaConteudo}>
-        {restaurantes.map(r => (
-          <View key={r.id} style={styles.card}>
-            <View style={styles.imagemPlaceholder}>
-              <Ionicons name="location" size={40} color="#FB8837" />
-            </View>
-            <View style={styles.info}>
-              <Text style={styles.nome}>{r.nome}</Text>
-              <Text style={styles.descricao}>{r.descricao}</Text>
-            </View>
-            <TouchableOpacity style={styles.botaoFavorito} onPress={() => alternarFavorito(r.id)}>
-              <Ionicons name={favoritos.includes(r.id) ? "heart" : "heart-outline"} size={26} color="#FB8837" />
-            </TouchableOpacity>
-          </View>
-        ))}
+<ScrollView style={styles.listaContainer} contentContainerStyle={styles.listaConteudo}>
+  {restaurantes.map(r => (
+    <TouchableOpacity
+      key={r.id}
+      style={styles.card}
+      activeOpacity={0.7}
+      onPress={() =>
+        navigation.navigate("DetalhesItem", { item: r, tipo: "restaurante" })
+      }
+    >
+      <View style={styles.imagemPlaceholder}>
+        <Ionicons name="location" size={40} color="#FB8837" />
+      </View>
 
-        {quantidade < listaCompleta.length && (
-          <TouchableOpacity style={styles.botaoMais} onPress={carregarMais}>
-            <Text style={styles.textoMais}>Veja mais</Text>
-          </TouchableOpacity>
-        )}
-      </ScrollView>
+      <View style={styles.info}>
+        <Text style={styles.nome}>{r.nome}</Text>
+        <Text style={styles.descricao}>{r.descricao}</Text>
+      </View>
+
+      <TouchableOpacity
+        style={styles.botaoFavorito}
+        onPress={(e) => {
+          e.stopPropagation?.();
+          alternarFavorito(r.id);
+        }}
+      >
+        <Ionicons
+          name={favoritos.includes(r.id) ? "heart" : "heart-outline"}
+          size={26}
+          color="#FB8837"
+        />
+      </TouchableOpacity>
+    </TouchableOpacity>
+  ))}
+
+  {quantidade < listaCompleta.length && (
+    <TouchableOpacity style={styles.botaoMais} onPress={carregarMais}>
+      <Text style={styles.textoMais}>Veja mais</Text>
+    </TouchableOpacity>
+  )}
+</ScrollView>
        <View style={styles.barra}>
           <TouchableOpacity
             style={styles.botaoItem}

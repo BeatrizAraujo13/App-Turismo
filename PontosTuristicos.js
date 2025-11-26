@@ -51,23 +51,38 @@ export default function PontosTuristicos() {
 
       <ScrollView style={styles.listaContainer} contentContainerStyle={styles.listaConteudo}>
         {pontos.slice(0, quantidade).map(ponto => (
-          <View key={ponto.id} style={styles.card}>
-            <View style={styles.imagemPlaceholder}>
-              <Ionicons name="location" size={40} color="#FB8837" />
-            </View>
-            <View style={styles.info}>
-              <Text style={styles.nome}>{ponto.nome}</Text>
-              <Text style={styles.descricao}>{ponto.descricao}</Text>
-            </View>
-            <TouchableOpacity style={styles.botaoFavorito} onPress={() => toggleFavorito(ponto.id)}>
-              <Ionicons
-                name={favoritos.includes(ponto.id) ? "heart" : "heart-outline"}
-                size={24}
-                color="#FB8837"
-              />
-            </TouchableOpacity>
-          </View>
-        ))}
+  <TouchableOpacity
+    key={ponto.id}
+    style={styles.card}
+    activeOpacity={0.8}
+    onPress={() => 
+      navigation.navigate("DetalhesItem", {
+        item: ponto,
+        tipo: "ponto"
+      })
+    }
+  >
+    <View style={styles.imagemPlaceholder}>
+      <Ionicons name="location" size={40} color="#FB8837" />
+    </View>
+
+    <View style={styles.info}>
+      <Text style={styles.nome}>{ponto.nome}</Text>
+      <Text style={styles.descricao}>{ponto.descricao}</Text>
+    </View>
+
+    <TouchableOpacity
+      style={styles.botaoFavorito}
+      onPress={() => toggleFavorito(ponto.id)}
+    >
+      <Ionicons
+        name={favoritos.includes(ponto.id) ? "heart" : "heart-outline"}
+        size={24}
+        color="#FB8837"
+      />
+    </TouchableOpacity>
+  </TouchableOpacity>
+))}
 
         {quantidade < pontos.length && (
           <TouchableOpacity style={styles.botaoMais} onPress={carregarMais}>

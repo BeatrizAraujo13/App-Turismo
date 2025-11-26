@@ -42,21 +42,40 @@ export default function Hospedagem() {
 
       <ScrollView style={styles.listaContainer} contentContainerStyle={styles.listaConteudo}>
         {hospedagens.slice(0, quantidade).map(h => (
-          <View key={h.id} style={styles.card}>
-            <View style={styles.imagemPlaceholder}>
-              <Ionicons name="location" size={40} color="#FB8837" />
-            </View>
-            <View style={styles.info}>
-              <Text style={styles.nome}>{h.nome}</Text>
-              <Text style={styles.descricao}>{h.descricao}</Text>
-            </View>
-            <TouchableOpacity style={styles.botaoFavorito} onPress={() => toggleFavorito(h.id)}>
-              <Ionicons name={favoritos.includes(h.id) ? "heart" : "heart-outline"} size={24} color="#FB8837" />
-            </TouchableOpacity>
-          </View>
-        ))}
-        {quantidade < hospedagens.length && (
-          <TouchableOpacity style={styles.botaoMais} onPress={carregarMais}>
+  <TouchableOpacity
+    key={h.id}
+    style={styles.card}
+    activeOpacity={0.8}
+    onPress={() =>
+      navigation.navigate("DetalhesItem", {
+        item: h,
+        tipo: "hospedagem"
+      })
+    }
+  >
+    <View style={styles.imagemPlaceholder}>
+      <Ionicons name="bed" size={40} color="#FB8837" />
+    </View>
+
+    <View style={styles.info}>
+      <Text style={styles.nome}>{h.nome}</Text>
+      <Text style={styles.descricao}>{h.descricao}</Text>
+    </View>
+
+    <TouchableOpacity
+      style={styles.botaoFavorito}
+      onPress={() => toggleFavorito(h.id)}
+    >
+      <Ionicons
+        name={favoritos.includes(h.id) ? "heart" : "heart-outline"}
+        size={24}
+        color="#FB8837"
+      />
+    </TouchableOpacity>
+  </TouchableOpacity>
+))}
+{quantidade < hospedagens.length && (
+  <TouchableOpacity style={styles.botaoMais} onPress={carregarMais}>
             <Text style={styles.textoMais}>Ver mais</Text>
           </TouchableOpacity>
         )}
