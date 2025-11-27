@@ -1,107 +1,42 @@
-import React from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, TextInput } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+// Eu dividi o arquivo APP.JS em dois arquivos: APP.JS e HOME.JS
+// O arquivo APP.JS agora é responsável apenas pela configuração da navegação
+// O arquivo HOME.JS contém o componente Home que foi movido para lá
+// Adicionei alguns comandos no favoritos, criei uma tela de login,
+// em services criei auth e api para lidar com autenticação e chamadas de API
+// tenho que verificar se a organização das pastas está correta e funcionando
+// Ver sobre o servidor como funciona
 
+import * as React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
-import Restaurantes from './Restaurantes';
-import Hospedagem from './Hospedagem';
-import PontosTuristicos from './PontosTuristicos';
-import Eventos from './Eventos';
-import Favoritos from './Favoritos';
-import Avaliar from './Avaliar';
-import Mapa from './Mapa';
+// Importa o novo componente Home
+import Login from './screens/Login.js';
+import Home from './screens/Home'; 
+import DetalhesItem from "./screens/DetalhesItem.js";
+
+// Importa todas as outras telas
+import Restaurantes from './screens/Restaurantes.js';
+import Hospedagem from './screens/Hospedagem.js';
+import PontosTuristicos from './screens/PontosTuristicos.js';
+import Eventos from './screens/Eventos.js';
+import Favoritos from './screens/Favoritos.js';
+import Avaliar from './screens/Avaliar.js';
+import Mapa from './screens/Mapa.js';
 
 const Stack = createNativeStackNavigator();
-
-function Home({ navigation }) {
-  return (
-    <View style={styles.container}>
-      {/* TOPO */}
-      <View style={styles.Topo}>
-        <Text style={styles.titulo}>VIVA CARUARU</Text>
-
-        <TouchableOpacity style={styles.menuSuperior}>
-          <Ionicons name="menu" size={30} color="#000" />
-        </TouchableOpacity>
-
-        <View style={styles.curva} />
-      </View>
-
-      {/* BOTÕES PRINCIPAIS */}
-      <View style={styles.buttonsContainer}>
-        <TouchableOpacity
-          style={styles.botao}
-          onPress={() => navigation.navigate('PontosTuristicos')}
-        >
-          <Text style={styles.botaoTextoPrincipal}>Pontos Turísticos</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.botao}
-          onPress={() => navigation.navigate('Restaurantes')}
-        >
-          <Text style={styles.botaoTextoPrincipal}>Comedorias</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.botao}
-          onPress={() => navigation.navigate('Hospedagem')}
-        >
-          <Text style={styles.botaoTextoPrincipal}>Hospedagem</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.botao}
-          onPress={() => navigation.navigate('Eventos')}
-        >
-          <Text style={styles.botaoTextoPrincipal}>Eventos</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.avaliar}
-          onPress={() => navigation.navigate('Avaliar')}
-        >
-          <Text style={styles.avaliarTexto}>Avalia-nos</Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* BARRA INFERIOR */}
-      <View style={styles.barra}>
-        <TouchableOpacity
-          style={styles.botaoItem}
-          onPress={() => navigation.navigate('Home')}
-        >
-          <Ionicons name="home" size={24} color="#000" />
-          <Text style={styles.botaoTextoBarra}>Início</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.botaoItem}
-          onPress={() => navigation.navigate('Mapa')}
-        >
-          <Ionicons name="map" size={24} color="#000" />
-          <Text style={styles.botaoTextoBarra}>Mapa</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.botaoItem}
-          onPress={() => navigation.navigate('Favoritos')}
-        >
-          <Ionicons name="heart" size={24} color="#000" />
-          <Text style={styles.botaoTextoBarra}>Favoritos</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
-  );
-}
 
 export default function App() {
   return (
     <NavigationContainer>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
+        
+        {/* LOGIN É A PRIMEIRA TELA */}
+        <Stack.Screen name="Login" component={Login} />
+
+        {/* HOME DEPOIS DO LOGIN */}
         <Stack.Screen name="Home" component={Home} />
+
         <Stack.Screen name="PontosTuristicos" component={PontosTuristicos} />
         <Stack.Screen name="Restaurantes" component={Restaurantes} />
         <Stack.Screen name="Hospedagem" component={Hospedagem} />
@@ -109,97 +44,8 @@ export default function App() {
         <Stack.Screen name="Favoritos" component={Favoritos} />
         <Stack.Screen name="Avaliar" component={Avaliar} />
         <Stack.Screen name="Mapa" component={Mapa} />
+        <Stack.Screen name="DetalhesItem" component={DetalhesItem} />
       </Stack.Navigator>
     </NavigationContainer>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { 
-    flex: 1, 
-    backgroundColor: '#fff'
-  },
-  Topo: {
-    width: '100%',
-    backgroundColor: '#FB8837',
-    alignItems: 'center',
-    paddingTop: 50,
-    paddingBottom: 40,
-    borderBottomLeftRadius: 100,
-    borderBottomRightRadius: 100,
-    position: 'relative',
-  },
-  titulo: { 
-    fontSize: 25, 
-    fontWeight: 'bold', 
-    color: '#000',
-     marginBottom: 20 
-    },
-  curva: {
-    position: 'absolute',
-    bottom: -60,
-    backgroundColor: '#FB8837',
-    width: '130%',
-    height: 120,
-    borderBottomLeftRadius: 200,
-    borderBottomRightRadius: 200,
-    zIndex: -1,
-  },
-  buttonsContainer: { 
-    marginTop: 80, 
-    alignItems: 'center', 
-    width: '100%' 
-  },
-  botao: {
-    backgroundColor: '#FB8837',
-    width: '80%',
-    height: 60,
-    borderRadius: 30,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginVertical: 15,
-    marginTop: 10,
-  },
-  botaoTextoPrincipal: { 
-    color: '#191717', 
-    fontSize: 25, 
-    fontWeight: 'bold' 
-  },
-  avaliar: {
-    backgroundColor: '#FB8837',
-    width: '35%',
-    height: 45,
-    borderRadius: 30,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginVertical: 15,
-    marginTop: 30,
-  },
-  avaliarTexto: { 
-    fontSize: 20, 
-    fontWeight: 'bold', 
-    color: '#000' 
-  },
-  barra: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    backgroundColor: '#FB8837',
-    width: '100%',
-    height: 90,
-    marginTop: 'auto',
-  },
-  botaoItem: { 
-    alignItems: 'center' 
-  },
-  botaoTextoBarra: { 
-    fontSize: 12, 
-    color: '#000', 
-    marginTop: 3 
-  },
-  menuSuperior: { 
-    position: 'absolute', 
-    top: 40, 
-    left: 20 
-  },
-});
