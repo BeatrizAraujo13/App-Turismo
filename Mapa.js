@@ -1,79 +1,69 @@
 import React from 'react';
-import { StyleSheet, View, Text, TouchableOpacity } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { View, StyleSheet, TouchableOpacity } from 'react-native';
+import MapView, { Marker } from 'react-native-maps';
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 
-export default function Mapa() {
+export default function Mapa({ route }) {
   const navigation = useNavigation();
+  const { latitude, longitude } = route.params || {};
+
+  const defaultCoords = {
+    latitude: -8.284550,
+    longitude: -35.969920,
+    latitudeDelta: 0.01,
+    longitudeDelta: 0.01,
+  };
+
+  const region = latitude && longitude
+    ? {
+        latitude,
+        longitude,
+        latitudeDelta: 0.01,
+        longitudeDelta: 0.01,
+      }
+    : defaultCoords;
 
   return (
     <View style={styles.container}>
-      <Text style={styles.titulo}>Mapa</Text>
-      <Text style={styles.texto}>Aqui estará o mapa com todos os pontos e restaurantes.</Text>
 
-      <View style={styles.barra}>
-              <TouchableOpacity
-                style={styles.botaoItem}
-                onPress={() => navigation.navigate('Home')}
-              >
-                <Ionicons name="home" size={24} color="#000" />
-                <Text style={styles.botaoTextoBarra}>Início</Text>
-              </TouchableOpacity>
-      
-              <TouchableOpacity
-                style={styles.botaoItem}
-                onPress={() => navigation.navigate('Mapa')}
-              >
-                <Ionicons name="map" size={24} color="#000" />
-                <Text style={styles.botaoTextoBarra}>Mapa</Text>
-              </TouchableOpacity>
-      
-              <TouchableOpacity
-                style={styles.botaoItem}
-                onPress={() => navigation.navigate('Favoritos')}
-              >
-                <Ionicons name="heart" size={24} color="#000" />
-                <Text style={styles.botaoTextoBarra}>Favoritos</Text>
-              </TouchableOpacity>
-            </View>
+      {/* Seta de voltar */}
+      <TouchableOpacity style={styles.backButton} onPress={() => navigation.navigate("Home")}>
+        <Ionicons name="arrow-back" size={28} color="black" />
+      </TouchableOpacity>
+
+      <MapView style={styles.map} initialRegion={region}>
+        {latitude && longitude ? (
+          <Marker coordinate={{ latitude, longitude }} title="Local selecionado" />
+        ) : (
+          <Marker 
+            coordinate={{ latitude: defaultCoords.latitude, longitude: defaultCoords.longitude }}
+            title="Caruaru - PE"
+          />
+        )}
+      </MapView>
+
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { 
-    flex: 1, 
-    justifyContent: 'center', 
-    alignItems: 'center', 
-    backgroundColor: '#fff' 
+  container: {
+    flex: 1,
   },
-  titulo: { 
-    fontSize: 25, 
-    fontWeight: 'bold', 
-    color: '#000', 
-    marginBottom: 20 
+
+  map: {
+    flex: 1,
   },
-  texto: { 
-    fontSize: 18, 
-    color: '#333', 
-    textAlign: 'center', 
-    paddingHorizontal: 20 
+
+  backButton: {
+    position: 'absolute',
+    top: 40,
+    left: 20,
+    zIndex: 999,
+    backgroundColor: 'white',
+    padding: 8,
+    borderRadius: 50,
+    elevation: 5,
   },
-  barra: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    backgroundColor: '#FB8837',
-    width: '100%',
-    height: 90,
-    marginTop: 'auto',
-  },
-  botaoItem: { 
-    alignItems: 'center' 
-  },
-  botaoTextoBarra: { 
-    fontSize: 12, 
-    color: '#000', 
-    marginTop: 3 
-  }
 });
