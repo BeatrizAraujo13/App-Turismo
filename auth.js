@@ -13,7 +13,6 @@ export async function login(email, senha) {
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
       }
     );
-
     const token = response.data.access_token;
     await SecureStore.setItemAsync("token", token);
     return { ok: true };

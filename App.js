@@ -13,7 +13,7 @@ import Eventos from './screens/Eventos.js';
 import Favoritos from './screens/Favoritos.js';
 import Avaliar from './screens/Avaliar.js';
 import Mapa from './screens/Mapa.js';
-
+import './screens/Favoritos.js';
 const Stack = createNativeStackNavigator();
 
 export default function App() {
