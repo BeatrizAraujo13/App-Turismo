@@ -13,7 +13,8 @@ import Eventos from './screens/Eventos.js';
 import Favoritos from './screens/Favoritos.js';
 import Avaliar from './screens/Avaliar.js';
 import Mapa from './screens/Mapa.js';
-
+import './screens/Favoritos.js';
+import './screens/CriarConta.js';
 const Stack = createNativeStackNavigator();
 
 export default function App() {
@@ -35,6 +36,7 @@ export default function App() {
         <Stack.Screen name="Avaliar" component={Avaliar} />
         <Stack.Screen name="Mapa" component={Mapa} />
         <Stack.Screen name="DetalhesItem" component={DetalhesItem} />
+        <Stack.Screen name="CriarConta" component={require('./screens/CriarConta.js').default} />
       </Stack.Navigator>
     </NavigationContainer>
   );
