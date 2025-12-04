@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, TextInput, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, TextInput, StyleSheet, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
+import { apiServices } from '../services/API'; // <-- IMPORTANTE
 
 const CaixaOpiniaoEmojis = () => {
   const [sentimento, setSentimento] = useState('');
@@ -16,13 +17,38 @@ const CaixaOpiniaoEmojis = () => {
     { emoji: '😍', label: 'Excelente', value: 'excelente' },
   ];
 
+  const enviarFeedback = async () => {
+    try {
+      const sentimentoSelecionado = emojis.find(e => e.value === sentimento);
+
+      await apiServices.post("/feedback", {
+        sentimento: sentimentoSelecionado.value,
+        comentario: comentario,
+      });
+
+      Alert.alert("Obrigado!", "Seu feedback foi enviado com sucesso!");
+
+      // Limpar campos
+      setSentimento("");
+      setComentario("");
+
+      navigation.goBack();
+
+    } catch (error) {
+      console.log("ERRO AO ENVIAR FEEDBACK:", error);
+      Alert.alert("Erro", "Não foi possível enviar seu feedback.");
+    }
+  };
+
   return (
     <View style={styles.container}>
-            <TouchableOpacity style={styles.botaoVoltar} onPress={() => navigation.goBack()}>
-              <Ionicons name="arrow-back" size={30} color="#000" />
-            </TouchableOpacity>
-            
+
+      <TouchableOpacity style={styles.botaoVoltar} onPress={() => navigation.goBack()}>
+        <Ionicons name="arrow-back" size={30} color="#000" />
+      </TouchableOpacity>
+
       <Text style={styles.titulo}>Como foi sua experiência?</Text>
+
       <Text style={styles.label}>Selecione seu sentimento:</Text>
       <View style={styles.emojisContainer}>
         {emojis.map((item) => (
@@ -50,19 +76,14 @@ const CaixaOpiniaoEmojis = () => {
         onChangeText={setComentario}
       />
 
-      <TouchableOpacity 
-        style={[
-          styles.botao,
-          !sentimento && styles.botaoDesabilitado
-        ]}
+      <TouchableOpacity
+        style={[styles.botao, !sentimento && styles.botaoDesabilitado]}
         disabled={!sentimento}
-        onPress={() => {
-          const sentimentoSelecionado = emojis.find(e => e.value === sentimento);
-          alert(`Obrigado pelo feedback!`);
-        }}
+        onPress={enviarFeedback}
       >
         <Text style={styles.botaoTexto}>Enviar Feedback</Text>
       </TouchableOpacity>
+
     </View>
   );
 };
@@ -140,10 +161,10 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
-  botaoVoltar: { 
-    position: 'absolute', 
-    top: 20, 
-    left: 15 
+  botaoVoltar: {
+    position: 'absolute',
+    top: 20,
+    left: 15
   },
 });
 

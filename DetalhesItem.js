@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput, Linking } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 
@@ -12,8 +12,6 @@ export default function DetalhesItem({ route }) {
   const [comentario, setComentario] = useState("");
   const [listaComentarios, setListaComentarios] = useState([]);
 
-
-  // Ícones diferentes para cada categoria
   const icones = {
     restaurante: "restaurant",
     ponto: "camera",
@@ -22,83 +20,60 @@ export default function DetalhesItem({ route }) {
     outro: "information-circle"
   };
 
+  // Função para abrir endereço no Google Maps
+  const abrirMapa = () => {
+    if (item.latitude && item.longitude) {
+      const url = `https://www.google.com/maps/search/?api=1&query=${item.latitude},${item.longitude}`;
+      Linking.openURL(url).catch(err => console.error("Erro ao abrir o Google Maps", err));
+    } else if (item.endereco) {
+      const url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.endereco)}`;
+      Linking.openURL(url).catch(err => console.error("Erro ao abrir o Google Maps", err));
+    }
+  };
+
   return (
     <View style={styles.container}>
-      
-      {/* Topo Laranja */}
       <View style={styles.header}>
         <TouchableOpacity style={styles.botaoVoltar} onPress={() => navigation.goBack()}>
           <Ionicons name="arrow-back" size={28} color="#000" />
         </TouchableOpacity>
-
-        <Text style={styles.headerTitulo}>{item.nome}</Text>
+        <Text style={styles.headerTitulo}>Informações</Text>
       </View>
 
       <ScrollView contentContainerStyle={styles.conteudo}>
-
-        {/* Ícone Principal */}
         <View style={styles.iconeContainer}>
           <Ionicons name={icones[tipo] || icones.outro} size={80} color="#FB8837" />
         </View>
 
-        {/* Nome */}
         <Text style={styles.nome}>{item.nome}</Text>
-
-        {/* Descrição */}
         <Text style={styles.descricao}>{item.descricao}</Text>
 
-        {/* Informação extra opcional */}
+        {/* Endereço */}
         {item.endereco && (
-          <Text style={styles.extra}>📍 Endereço: {item.endereco}</Text>
+          <TouchableOpacity onPress={abrirMapa}>
+            <Text style={[styles.extra, { textDecorationLine: 'underline', color: '#0066cc' }]}>
+              📍 Endereço: {item.endereco}
+            </Text>
+          </TouchableOpacity>
         )}
 
-        {item.horario && (
-          <Text style={styles.extra}>⏰ Horário: {item.horario}</Text>
-        )}
-
-        {item.telefone && (
-          <Text style={styles.extra}>📞 Telefone: {item.telefone}</Text>
-        )}
-
-        {/* Botão Favoritar */}
-        <TouchableOpacity 
-          style={styles.favoritarBtn} 
-          onPress={() => setFavorito(prev => !prev)}
-        >
-          <Ionicons 
-            name={favorito ? "heart" : "heart-outline"} 
-            size={30} 
-            color="#FB8837" 
-          />
-          <Text style={styles.favoritarTexto}>
-            {favorito ? "Remover dos favoritos" : "Adicionar aos favoritos"}
-          </Text>
-        </TouchableOpacity>
-
-        {/* Avaliação por Estrelas */}
         <View style={styles.avaliacaoContainer}>
           <Text style={styles.avaliacaoTitulo}>Avaliação</Text>
-
           <View style={styles.starsRow}>
-           {[1, 2, 3, 4, 5].map((estrela) => (
-          <TouchableOpacity key={estrela} onPress={() => setAvaliacao(estrela)}>
-            <Ionicons
-              name={avaliacao >= estrela ? "star" : "star-outline"}
-              style={styles.starIcon}
-            />
-          </TouchableOpacity>
-     ))}
+            {[1, 2, 3, 4, 5].map((estrela) => (
+              <TouchableOpacity key={estrela} onPress={() => setAvaliacao(estrela)}>
+                <Ionicons
+                  name={avaliacao >= estrela ? "star" : "star-outline"}
+                  style={styles.starIcon}
+                />
+              </TouchableOpacity>
+            ))}
+          </View>
+          {avaliacao > 0 && <Text style={styles.notaText}>Você avaliou: {avaliacao} ⭐</Text>}
         </View>
 
-
-          {avaliacao > 0 && (
-            <Text style={styles.notaText}>Você avaliou: {avaliacao} ⭐</Text>
-          )}
-        </View>
-        {/* Comentários */}
         <View style={styles.comentarioContainer}>
           <Text style={styles.comentarioTitulo}>Comentário</Text>
-
           <TextInput
             style={styles.comentarioInput}
             placeholder="Escreva seu comentário..."
@@ -106,7 +81,6 @@ export default function DetalhesItem({ route }) {
             onChangeText={setComentario}
             multiline
           />
-
           <TouchableOpacity 
             style={styles.comentarioBtn}
             onPress={() => {
@@ -120,172 +94,164 @@ export default function DetalhesItem({ route }) {
             <Text style={styles.comentarioBtnTexto}>Enviar Comentário</Text>
           </TouchableOpacity>
         </View>
-        {/* Lista de Comentários */}
-<View style={styles.listaContainer}>
-  <Text style={styles.listaTitulo}>Avaliações Recentes</Text>
 
-  {listaComentarios.length === 0 ? (
-    <Text style={styles.semComentarios}>
-      Nenhuma avaliação ainda.
-    </Text>
-  ) : (
-    listaComentarios.map((item, index) => (
-      <View key={index} style={styles.comentarioCard}>
-        
-        {/* Estrelas da nota */}
-        <View style={{ flexDirection: "row" }}>
-          {[1, 2, 3, 4, 5].map((n) => (
-            <Ionicons
-              key={n}
-              name={item.nota >= n ? "star" : "star-outline"}
-              size={18}
-              color="#FB8837"
-            />
-          ))}
+        <View style={styles.listaContainer}>
+          <Text style={styles.listaTitulo}>Avaliações Recentes</Text>
+          {listaComentarios.length === 0 ? (
+            <Text style={styles.semComentarios}>Nenhuma avaliação ainda.</Text>
+          ) : (
+            listaComentarios.map((item, index) => (
+              <View key={index} style={styles.comentarioCard}>
+                <View style={{ flexDirection: "row" }}>
+                  {[1, 2, 3, 4, 5].map((n) => (
+                    <Ionicons
+                      key={n}
+                      name={item.nota >= n ? "star" : "star-outline"}
+                      size={18}
+                      color="#FB8837"
+                    />
+                  ))}
+                </View>
+                <Text style={styles.comentarioTexto}>{item.texto}</Text>
+              </View>
+            ))
+          )}
         </View>
-
-        {/* Texto do comentário */}
-        <Text style={styles.comentarioTexto}>{item.texto}</Text>
-
-      </View>
-    ))
-  )}
-</View>
-
       </ScrollView>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { 
-    flex: 1, 
-    backgroundColor: "#fff" 
-  },
-
+  container: { flex: 1, backgroundColor: "#fff" },
   header: {
     backgroundColor: "#FB8837",
-    paddingTop: 60,
-    paddingBottom: 40,
+    paddingTop: 70,
+    paddingBottom: 50,
     alignItems: "center",
     borderBottomLeftRadius: 100,
     borderBottomRightRadius: 100
   },
-
-  botaoVoltar: {
-    position: "absolute",
-    top: 50,
-    left: 20,
+  botaoVoltar: { 
+    position: "absolute", 
+    top: 50, 
+    left: 20 
   },
-
-  headerTitulo: {
-    fontSize: 22,
-    fontWeight: "bold",
-    color: "#000",
-  },
-
-  conteudo: { padding: 20 },
-
-  iconeContainer: {
-    alignSelf: "center",
-    backgroundColor: "#fff",
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    justifyContent: "center",
-    alignItems: "center",
-    elevation: 4,
-    marginBottom: 20
-  },
-
-  nome: {
-    fontSize: 26,
-    fontWeight: "bold",
-    color: "#333",
-    textAlign: "center",
-    marginBottom: 20
-  },
-
-  descricao: {
-    fontSize: 18,
-    color: "#555",
-    marginBottom: 20,
+  headerTitulo: { 
+    fontSize: 22, 
+    fontWeight: "bold", 
+    color: "#000", 
     textAlign: "center"
   },
-
-  extra: {
-    fontSize: 16,
-    color: "#444",
-    marginBottom: 10,
+  conteudo: { 
+    padding: 20 
   },
-
-  favoritarBtn: {
-    marginTop: 30,
-    alignSelf: "center",
-    alignItems: "center"
+  iconeContainer: { 
+    alignSelf: "center", 
+    backgroundColor: "#fff", 
+    width: 120, 
+    height: 120, 
+    borderRadius: 60, 
+    justifyContent: "center", 
+    alignItems: "center", 
+    elevation: 4, 
+    marginBottom: 20 
   },
-
-  favoritarTexto: {
-    marginTop: 5,
-    fontSize: 14,
-    color: "#444"
+  nome: { 
+    fontSize: 26, 
+    fontWeight: "bold", 
+    color: "#333", 
+    textAlign: "center", 
+    marginBottom: 20
   },
-  starsRow: {
-    flexDirection: "row",
-    justifyContent: "center",
-    marginVertical: 15,
+  descricao: { 
+    fontSize: 18, 
+    color: "#555", 
+    marginBottom: 20, 
+    textAlign: "center" 
   },
-
-  starIcon: {
+  extra: { 
+    fontSize: 16, 
+    color: "#444", 
+    marginBottom: 10 
+  },
+  starsRow: { 
+    flexDirection: "row", 
+    justifyContent: "center", 
+    marginVertical: 15 
+  },
+  starIcon: { 
     fontSize: 30, 
     color: "#FB8837", 
-    marginHorizontal: 5, 
+    marginHorizontal: 5 
   },
-  avaliacaoContainer: {
-    marginTop: 30,
-    alignItems: "center"
+  avaliacaoContainer: { 
+    marginTop: 30, 
+    alignItems: "center" 
   },
-
-  avaliacaoTitulo: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "#333",
-    marginBottom: 10
+  avaliacaoTitulo: { 
+    fontSize: 20, 
+    fontWeight: "bold", 
+    color: "#333", 
+    marginBottom: 10 
   },
-  notaText: {
-    fontSize: 16,
-    color: "#555",
-    marginTop: 5
+  notaText: { 
+    fontSize: 16, 
+    color: "#555", 
+    marginTop: 5 
   },
-  comentarioContainer: {
-    marginTop: 20,
-    paddingHorizontal: 20,
-    marginBottom: 30
+  comentarioContainer: { 
+    marginTop: 20, 
+    paddingHorizontal: 20, 
+    marginBottom: 30 
   },
-  comentarioTitulo: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "#333",
-    marginBottom: 10
+  comentarioTitulo: { 
+    fontSize: 20, 
+    fontWeight: "bold", 
+    color: "#333", 
+    marginBottom: 10 
   },
-  comentarioInput: {
-    borderWidth: 1,
-    borderColor: "#ddd",
-    borderRadius: 8,
-    padding: 10,
-    height: 80,
-    textAlignVertical: "top",
-    marginBottom: 10
+  comentarioInput: { 
+    borderWidth: 1, 
+    borderColor: "#ddd", 
+    borderRadius: 8, 
+    padding: 10, 
+    height: 80, 
+    textAlignVertical: "top", 
+    marginBottom: 10 
   },
-  comentarioBtn: {
-    backgroundColor: "#FB8837",
-    padding: 12,
-    borderRadius: 8,
-    alignItems: "center"
+  comentarioBtn: { 
+    backgroundColor: "#FB8837", 
+    padding: 12, 
+    borderRadius: 8, 
+    alignItems: "center" 
   },
-  comentarioBtnTexto: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "bold"
+  comentarioBtnTexto: { 
+    color: "#fff", 
+    fontSize: 16, 
+    fontWeight: "bold" 
+  },
+  listaContainer: { 
+    marginTop: 20 
+  },
+  listaTitulo: { 
+    fontSize: 18, 
+    fontWeight: "bold", 
+    marginBottom: 10 
+  },
+  semComentarios: { 
+    color: "#555", 
+    fontStyle: "italic" 
+  },
+  comentarioCard: { 
+    marginBottom: 15, 
+    backgroundColor: "#f7f7f7", 
+    padding: 10, 
+    borderRadius: 8 
+  },
+  comentarioTexto: { 
+    fontSize: 14, 
+    color: "#333", 
+    marginTop: 5 
   }
 });

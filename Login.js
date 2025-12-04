@@ -1,13 +1,11 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 
 export default function Login({ navigation }) {
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
-
-  senha == '12345';
-  email == 'tentar'
 
   function entrar() {
     navigation.navigate('Home');
@@ -16,11 +14,15 @@ export default function Login({ navigation }) {
   return (
     <View style={styles.container}>
 
-      {/* TOPO */}
-      <View style={styles.Topo}>
+      {/* TOPO COM GRADIENTE */}
+      <LinearGradient
+        colors={['#FFB347', '#FF7F11']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.Topo}
+      >
         <Text style={styles.titulo}>VIVA CARUARU</Text>
-
-      </View>
+      </LinearGradient>
 
       {/* CAMPOS */}
       <View style={styles.areaLogin}>
@@ -50,9 +52,16 @@ export default function Login({ navigation }) {
           />
         </View>
 
-        {/* BOTÃO ENTRAR */}
-        <TouchableOpacity style={styles.botao} onPress={entrar}>
-          <Text style={styles.botaoTextoPrincipal}>Entrar</Text>
+        {/* BOTÃO ENTRAR COM GRADIENTE */}
+        <TouchableOpacity onPress={entrar} style={{ marginTop: 10 }}>
+          <LinearGradient
+            colors={['#FFB347', '#FF7F11']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.botao}
+          >
+            <Text style={styles.botaoTextoPrincipal}>Entrar</Text>
+          </LinearGradient>
         </TouchableOpacity>
 
         {/* CRIAR CONTA */}
@@ -72,14 +81,12 @@ const styles = StyleSheet.create({
   },
 
   Topo: {
-    backgroundColor: '#fe9311ff',
     paddingTop: 100,
     paddingHorizontal: 20,
-    position: 'relative',
     alignItems: 'center',
     paddingBottom: 80,
-    borderBottomLeftRadius: '50%',
-    borderBottomRightRadius: '50%',
+    borderBottomLeftRadius: 120,
+    borderBottomRightRadius: 120,
   },
 
   titulo: {
@@ -119,11 +126,9 @@ const styles = StyleSheet.create({
   },
 
   botao: {
-    backgroundColor: '#FB8837',
     paddingVertical: 14,
     borderRadius: 14,
     alignItems: 'center',
-    marginTop: 10,
   },
 
   botaoTextoPrincipal: {
