@@ -1,50 +1,64 @@
-import axios from "axios";
+import axios from 'axios';
 
-// CONFIGURAÇÃO DO SERVIDOR
-const API_URL = "http://192.168.0.11:8000";
+const API_BASE_URL = 'https://guiacaruaruapi.onrender.com';
 
-// Instância do Axios
 export const api = axios.create({
-  baseURL: API_URL,
-  timeout: 5000,
+  baseURL: API_BASE_URL,
+  timeout: 15000,
 });
 
-/* ------------------ EVENTOS ------------------ */
-export async function listarEventos() {
-  const res = await api.get("/eventos");
-  return res.data;
-}
+export const apiServices = {
+  // Pontos turísticos
+  getPontosTuristicos: () =>
+    api.get('/mapa/pins?tipo=tourist_attraction'),
 
-/* ------------------ RESTAURANTES ------------------ */
-export async function listarRestaurantes() {
-  const res = await api.get("/restaurantes");
-  return res.data;
-}
+  // Restaurantes/Comedorias
+  getComedorias: () =>
+    api.get('/mapa/pins?tipo=restaurant'),
 
-/* ------------------ HOSPEDAGEM ------------------ */
-export async function listarHospedagem() {
-  const res = await api.get("/hospedagem");
-  return res.data;
-}
+  // Hospedagem
+  getHospedagem: () =>
+    api.get('/mapa/pins?tipo=lodging'),
 
-/* ------------------ PONTOS TURÍSTICOS ------------------ */
-export async function listarPontos() {
-  const res = await api.get("/pontos");
-  return res.data;
-}
+  // Eventos
+  getEventos: () =>
+    api.get('/eventos'),
 
-/* ------------------ FAVORITOS ------------------ */
-export async function listarFavoritos() {
-  const res = await api.get("/favoritos");
-  return res.data;
-}
+  // Favoritos
+  getFavoritos: (token) =>
+    api.get("/user/favoritos", {
+      headers: { Authorization: `Bearer ${token}` }
+    }),
 
-export async function adicionarFavorito(dados) {
-  const res = await api.post("/favoritos", dados);
-  return res.data;
-}
+  addFavorito: (place_id, token) =>
+    api.post("/user/favorito", { place_id }, {
+      headers: { Authorization: `Bearer ${token}` }
+    }),
 
-export async function removerFavorito(id) {
-  const res = await api.delete(`/favoritos/${id}`);
-  return res.data;
-}
+  removeFavorito: (place_id, token) =>
+    api.delete(`/user/favorito/${place_id}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    }),
+
+  // Busca
+  searchPlace: (query) =>
+    api.get(`/search/place?q=${query}`),
+
+  // Feedback 
+  enviarFeedback: (place_id_google, nota, comentario, token) =>
+    api.post("/avaliacoes", {
+      place_id_google,
+      nota,
+      comentario,
+    }, {
+      headers: { Authorization: `Bearer ${token}` }
+    }),
+
+  getAvaliacoes: (place_id_google, skip = 0, limit = 5) =>
+    api.get(`/avaliacoes/${place_id_google}?skip=${skip}&limit=${limit}`),
+
+  enviarFeedback: (place_id_google, nota, comentario) =>
+    api.post("/avaliacoes", { place_id_google, nota, comentario }),
+};
+
+export default api;

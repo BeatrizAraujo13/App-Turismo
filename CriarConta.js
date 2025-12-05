@@ -3,19 +3,19 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityInd
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import axios from 'axios';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 
 const API_BASE_URL = "https://guiacaruaruapi.onrender.com";
 
-export default function Login() {
+export default function CriarConta() {
+  const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [loading, setLoading] = useState(false);
   const navigation = useNavigation();
 
-  const entrar = async () => {
-    if (!email || !senha) {
+  const criarConta = async () => {
+    if (!nome || !email || !senha) {
       Alert.alert("Atenção", "Preencha todos os campos!");
       return;
     }
@@ -23,46 +23,25 @@ export default function Login() {
     setLoading(true);
 
     try {
-      const formData = new URLSearchParams();
-      formData.append('grant_type', 'password');
-      formData.append('username', email);
-      formData.append('password', senha);
-
       const response = await axios.post(
-        `${API_BASE_URL}/login`,
-        formData.toString(),
-        {
-          headers: { "Content-Type": "application/x-www-form-urlencoded" }
-        }
+        `${API_BASE_URL}/register`,
+        { nome, email, senha },
+        { headers: { "Content-Type": "application/json" } }
       );
 
-      console.log("Login bem-sucedido:", response.data);
-
-      // Salvar token (se API retornar token)
-      if (response.data.access_token) {
-        await AsyncStorage.setItem('token', response.data.access_token);
-      }
-
-      Alert.alert("Sucesso!", "Login realizado com sucesso.");
-
-      // Navegar para Home
-      navigation.reset({
-        index: 0,
-        routes: [{ name: 'Home' }],
-      });
+      console.log("Conta criada com sucesso:", response.data);
+      Alert.alert("Sucesso!", "Conta criada com sucesso. Faça login agora.");
+      navigation.navigate('Login');
 
     } catch (error) {
-      console.log("Erro no login:", error.response?.data || error.message);
+      console.log("Erro ao criar conta:", error.response?.data || error.message);
 
-      let mensagemErro = "Falha no login.";
+      // tratamento das mensagens de erro
+      let mensagemErro = "Falha ao criar conta.";
       if (error.response?.data?.detail) {
-        if (typeof error.response.data.detail === "string") {
-          mensagemErro = error.response.data.detail;
-        } else {
-          mensagemErro = error.response.data.detail
-            .map(item => item.msg)
-            .join(', ');
-        }
+        mensagemErro = error.response.data.detail
+          .map(item => item.msg)
+          .join(', ');
       }
 
       Alert.alert("Erro", mensagemErro);
@@ -74,18 +53,28 @@ export default function Login() {
   return (
     <View style={styles.container}>
 
-      {/* TOPO */}
       <LinearGradient
         colors={['#FFB347', '#FF7F11']}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={styles.topo}
       >
-        <Text style={styles.titulo}>VIVA CARUARU</Text>
+        <Text style={styles.titulo}>CRIAR CONTA</Text>
       </LinearGradient>
 
-      {/* CAMPOS EMAIL E SENHA */}
-      <View style={styles.areaLogin}>
+      <View style={styles.formulario}>
+
+        <Text style={styles.label}>Nome</Text>
+        <View style={styles.inputArea}>
+          <Ionicons name="person" size={20} color="#555" />
+          <TextInput
+            style={styles.input}
+            placeholder="Digite seu nome"
+            placeholderTextColor="#777"
+            value={nome}
+            onChangeText={setNome}
+          />
+        </View>
 
         <Text style={styles.label}>Email</Text>
         <View style={styles.inputArea}>
@@ -113,8 +102,7 @@ export default function Login() {
           />
         </View>
 
-        {/* BOTÃO ENTRAR */}
-        <TouchableOpacity onPress={entrar} style={{ marginTop: 10 }}>
+        <TouchableOpacity onPress={criarConta} style={{ marginTop: 10 }}>
           <LinearGradient
             colors={['#FFB347', '#FF7F11']}
             start={{ x: 0, y: 0 }}
@@ -123,14 +111,13 @@ export default function Login() {
           >
             {loading
               ? <ActivityIndicator color="#fff" />
-              : <Text style={styles.botaoTextoPrincipal}>Entrar</Text>
+              : <Text style={styles.botaoTexto}>Criar Conta</Text>
             }
           </LinearGradient>
         </TouchableOpacity>
 
-        {/* CRIAR CONTA */}
-        <TouchableOpacity onPress={() => navigation.navigate('CriarConta')}>
-          <Text style={styles.link}>Criar conta</Text>
+        <TouchableOpacity onPress={() => navigation.navigate('Login')}>
+          <Text style={styles.link}>Já tem conta? Faça login</Text>
         </TouchableOpacity>
 
       </View>
@@ -142,7 +129,7 @@ const styles = StyleSheet.create({
   container: { 
     flex: 1, 
     backgroundColor: '#FFF' 
-  },
+},
   topo: { 
     paddingTop: 100, 
     paddingHorizontal: 20, 
@@ -150,22 +137,22 @@ const styles = StyleSheet.create({
     paddingBottom: 80, 
     borderBottomLeftRadius: 120, 
     borderBottomRightRadius: 120 
-  },
+},
   titulo: { 
-    fontSize: 30, 
+    fontSize: 28, 
     fontWeight: 'bold', 
     color: '#000' 
-  },
-  areaLogin: { 
-    marginTop: 80, 
+},
+  formulario: { 
+    marginTop: 50, 
     paddingHorizontal: 30 
-  },
+},
   label: { 
     fontSize: 16, 
     fontWeight: '600', 
     marginBottom: 6, 
     color: '#333' 
-  },
+},
   inputArea: { 
     flexDirection: 'row', 
     alignItems: 'center', 
@@ -175,28 +162,28 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10, 
     paddingVertical: 8, 
     marginBottom: 20 
-  },
+},
   input: { 
     flex: 1, 
     marginLeft: 8, 
     fontSize: 16, 
     color: '#000' 
-  },
+},
   botao: { 
     paddingVertical: 14, 
     borderRadius: 14, 
     alignItems: 'center' 
-  },
-  botaoTextoPrincipal: { 
+},
+  botaoTexto: { 
     fontSize: 18, 
     fontWeight: 'bold', 
     color: '#000' 
-  },
+},
   link: { 
     marginTop: 15, 
     fontSize: 16, 
     color: '#4169E1', 
     textAlign: 'center', 
     fontWeight: '600' 
-  },
+},
 });

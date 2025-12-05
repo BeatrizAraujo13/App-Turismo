@@ -1,245 +1,376 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, ScrollView, TextInput } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, ScrollView, TextInput, ActivityIndicator, Linking, Alert, SafeAreaView, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
-import { listarPontos } from '../services/API';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import { apiServices } from '../services/API';
+import { getLocalFavoritoIds, toggleLocalFavorito } from '../services/LocalFavoritos'; 
+import { LinearGradient } from 'expo-linear-gradient';
 
 export default function PontosTuristicos() {
-  const navigation = useNavigation();
+    const navigation = useNavigation();
+    const [favoritosIds, setFavoritosIds] = useState([]);
+    const [quantidade, setQuantidade] = useState(5);
+    const [pontos, setPontos] = useState([]);
+    const [busca, setBusca] = useState("");
+    const [loading, setLoading] = useState(true);
 
-  const [favoritos, setFavoritos] = useState([]);
-  const [quantidade, setQuantidade] = useState(5);
-  const [pontosTuristico, setPontos] = useState([]);
-  const [busca, setBusca] = useState("");
+    useEffect(() => { carregarDadosIniciais(); }, []);
 
-  useEffect(() => {
-    carregar();
-  }, []);
-
-  async function carregar() {
-    try {
-      const dados = await listarPontos();
-      setPontos(dados);
-    } catch (e) {
-      console.log("Erro ao carregar pontos turísticos:", e);
-    }
-  }
-
-  const toggleFavorito = (id) => {
-    setFavoritos(prev =>
-      prev.includes(id)
-        ? prev.filter(f => f !== id)
-        : [...prev, id]
+    useFocusEffect(
+        React.useCallback(() => { carregarFavoritosLocais(); }, [])
     );
-  };
 
-  const carregarMais = () => {
-    setQuantidade(prev => prev + 4);
-  };
+    async function carregarDadosIniciais() {
+        setLoading(true);
+        try {
+            const response = await apiServices.getPontosTuristicos(); 
+            setPontos(response.data || []);
+            await carregarFavoritosLocais();
+        } catch (e) {
+            console.error("Erro ao carregar dados:", e.message);
+            Alert.alert("Erro", "Não foi possível carregar os pontos turísticos.");
+        } finally { setLoading(false); }
+    }
 
-  const listaFiltrada = pontosTuristico.filter(p =>
-    p.nome.toLowerCase().includes(busca.toLowerCase())
-  );
+    async function carregarFavoritosLocais() {
+        try {
+            const ids = await getLocalFavoritoIds();
+            setFavoritosIds(ids);
+        } catch (e) { console.error("Erro ao carregar favoritos locais:", e); }
+    }
 
-  return (
-    <View style={styles.container}>
-      <View style={styles.Topo}>
-        <TouchableOpacity style={styles.botaoVoltar} onPress={() => navigation.goBack()}>
-          <Ionicons name="arrow-back" size={30} color="#000" />
-        </TouchableOpacity>
+    async function handleToggleFavorito(place_id) {
+        if (!place_id) return;
+        try {
+            const novosIds = await toggleLocalFavorito(place_id);
+            setFavoritosIds(novosIds);
+        } catch (error) {
+            console.error("Erro ao atualizar favorito:", error.message);
+            Alert.alert("Erro", "Não foi possível atualizar o favorito.");
+        }
+    }
 
-        <Text style={styles.titulo}>Pontos Turísticos</Text>
+    const listaFiltrada = pontos.filter(p => {
+        if (!p) return false;
+        const titulo = p.titulo || '';
+        return titulo.toLowerCase().includes(busca.toLowerCase());
+    });
 
-        <View style={styles.Pesquisar}>
-          <TextInput
-            placeholder="O que você procura..."
-            placeholderTextColor="#555"
-            style={styles.input}
-            value={busca}
-            onChangeText={setBusca}
-          />
-          <Ionicons name="search" size={20} color="#777" style={styles.searchIcon} />
-        </View>
-      </View>
+    const abrirMapa = (ponto) => {
+        if (ponto.latitude && ponto.longitude) {
+            const url = `https://www.google.com/maps/search/?api=1&query=${ponto.latitude},${ponto.longitude}`;
+            Linking.openURL(url).catch(() => Alert.alert("Erro", "Não foi possível abrir o mapa."));
+        } else if (ponto.endereco) {
+            const url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(ponto.endereco)}`;
+            Linking.openURL(url).catch(() => Alert.alert("Erro", "Não foi possível abrir o mapa."));
+        } else {
+            Alert.alert('Localização', 'Endereço ou coordenadas não disponíveis.');
+        }
+    };
 
-      <ScrollView style={styles.listaContainer} contentContainerStyle={styles.listaConteudo}>
-        {listaFiltrada.slice(0, quantidade).map(ponto => (
-          <TouchableOpacity
-            key={ponto.id}
-            style={styles.card}
-            activeOpacity={0.8}
-            onPress={() =>
-              navigation.navigate("DetalhesItem", {
-                item: ponto,
-                tipo: "ponto"
-              })
-            }
-          >
-            <View style={styles.imagemPlaceholder}>
-              <Ionicons name="location" size={40} color="#FB8837" />
+    if (loading) {
+        return (
+            <View style={styles.loadingContainer}>
+                <ActivityIndicator size="large" color="#FB8837" />
+                <Text style={styles.loadingText}>Carregando pontos turísticos...</Text>
             </View>
+        );
+    }
 
-            <View style={styles.info}>
-              <Text style={styles.nome}>{ponto.nome}</Text>
-              <Text style={styles.descricao}>{ponto.descricao}</Text>
-            </View>
-
-            <TouchableOpacity
-              style={styles.botaoFavorito}
-              onPress={() => toggleFavorito(ponto.id)}
+    return (
+        <SafeAreaView style={styles.container}>
+            {/* TOPO COM GRADIENT */}
+            <LinearGradient
+                colors={['#FB8837', '#FFA500']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={styles.Topo}
             >
-              <Ionicons
-                name={favoritos.includes(ponto.id) ? "heart" : "heart-outline"}
-                size={24}
-                color="#FB8837"
-              />
-            </TouchableOpacity>
-          </TouchableOpacity>
-        ))}
+                <TouchableOpacity style={styles.botaoVoltar} onPress={() => navigation.goBack()}>
+                    <Ionicons name="arrow-back" size={30} color="#000" />
+                </TouchableOpacity>
 
-        {quantidade < listaFiltrada.length && (
-          <TouchableOpacity style={styles.botaoMais} onPress={carregarMais}>
-            <Text style={styles.textoMais}>Ver mais</Text>
-          </TouchableOpacity>
-        )}
-      </ScrollView>
+                <Text style={styles.titulo}>Pontos Turísticos</Text>
 
-      <View style={styles.barra}>
-        <TouchableOpacity style={styles.botaoItem} onPress={() => navigation.navigate('Home')}>
-          <Ionicons name="home" size={24} color="#000" />
-          <Text style={styles.botaoTextoBarra}>Início</Text>
-        </TouchableOpacity>
+                <View style={styles.Pesquisar}>
+                    <TextInput
+                        placeholder="Buscar pontos turísticos..."
+                        placeholderTextColor="#555"
+                        style={styles.input}
+                        value={busca}
+                        onChangeText={setBusca}
+                    />
+                    <Ionicons name="search" size={20} color="#777" style={styles.searchIcon} />
+                </View>
+            </LinearGradient>
 
-        <TouchableOpacity style={styles.botaoItem} onPress={() => navigation.navigate('Mapa')}>
-          <Ionicons name="map" size={24} color="#000" />
-          <Text style={styles.botaoTextoBarra}>Mapa</Text>
-        </TouchableOpacity>
+            {/* LISTA */}
+            <ScrollView style={styles.listaContainer} contentContainerStyle={styles.listaConteudo}>
+                {listaFiltrada.slice(0, quantidade).map((ponto, index) => {
+                    const itemId = ponto.place_id || ponto.id;
+                    const titulo = ponto.titulo || `Ponto ${index + 1}`;
+                    const endereco = ponto.endereco || 'Endereço não disponível';
+                    const isFav = favoritosIds.includes(itemId);
 
-        <TouchableOpacity style={styles.botaoItem} onPress={() => navigation.navigate('Favoritos')}>
-          <Ionicons name="heart" size={24} color="#000" />
-          <Text style={styles.botaoTextoBarra}>Favoritos</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
-  );
+                    return (
+                        <TouchableOpacity
+                            key={itemId || index}
+                            style={styles.card}
+                            activeOpacity={0.8}
+                            onPress={() => navigation.navigate("DetalhesItem", { item: ponto, tipo: "ponto" })}
+                        >
+                            {/* IMAGEM CIRCULAR */}
+                            <View style={styles.imagemCiculo}>
+                                {ponto.imagem ? (
+                                    <Image
+                                        source={{ uri: ponto.imagem }}
+                                        style={styles.imagemCiculo}
+                                        resizeMode="cover"
+                                    />
+                                ) : (
+                                    <Ionicons name="location" size={40} color="#FB8837" />
+                                )}
+                            </View>
+
+                            <View style={styles.info}>
+                                <Text style={styles.nome} numberOfLines={1}>{titulo}</Text>
+                                <TouchableOpacity onPress={() => abrirMapa(ponto)}>
+                                    <Text style={[styles.endereco, { textDecorationLine: 'underline', color: '#0066cc' }]} numberOfLines={1}>
+                                        📍 {endereco}
+                                    </Text>
+                                </TouchableOpacity>
+                            </View>
+
+                            {/* FAVORITO COM GRADIENT */}
+                            <TouchableOpacity
+                                style={styles.botaoFavoritoTouch}
+                                onPress={() => handleToggleFavorito(itemId)}
+                                activeOpacity={0.8}
+                            >
+                                {isFav ? (
+                                    <LinearGradient
+                                        colors={['#FB8837', '#FFA500']}
+                                        start={{ x: 0, y: 0 }}
+                                        end={{ x: 1, y: 1 }}
+                                        style={styles.favGradient}
+                                    >
+                                        <Ionicons name="heart" size={18} color="#fff" />
+                                    </LinearGradient>
+                                ) : (
+                                    <View style={styles.favOutline}>
+                                        <Ionicons name="heart-outline" size={20} color="#FB8837" />
+                                    </View>
+                                )}
+                            </TouchableOpacity>
+                        </TouchableOpacity>
+                    );
+                })}
+
+                {quantidade < listaFiltrada.length && (
+                    <TouchableOpacity onPress={() => setQuantidade(prev => prev + 4)}>
+                        <LinearGradient
+                            colors={['#FB8837', '#fdb633ff']}
+                            start={{ x: 0, y: 0 }}
+                            end={{ x: 1, y: 0 }}
+                            style={styles.botaoMais}
+                        >
+                            <Text style={styles.textoMais}>Carregar mais ({listaFiltrada.length - quantidade} restantes)</Text>
+                        </LinearGradient>
+                    </TouchableOpacity>
+                )}
+
+                {listaFiltrada.length === 0 && (
+                    <View style={styles.semResultados}>
+                        <Ionicons name="search-outline" size={50} color="#ccc" />
+                        <Text style={styles.semResultadosTexto}>
+                            Nenhum ponto turístico encontrado{'\n'}
+                            {busca ? `para "${busca}"` : ''}
+                        </Text>
+                    </View>
+                )}
+            </ScrollView>
+
+            {/* BARRA INFERIOR COM GRADIENT */}
+            <LinearGradient
+                colors={['#FB8837', '#fcb530ff']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={styles.barra}
+            >
+                <TouchableOpacity style={styles.botaoItem} onPress={() => navigation.navigate('Home')}>
+                    <Ionicons name="home" size={24} color="#000" />
+                    <Text style={styles.botaoTextoBarra}>Início</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity style={styles.botaoItem} onPress={() => navigation.navigate('Mapa')}>
+                    <Ionicons name="map" size={24} color="#000" />
+                    <Text style={styles.botaoTextoBarra}>Mapa</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity style={styles.botaoItem} onPress={() => navigation.navigate('Favoritos', { pontos: pontos.filter(p => favoritosIds.includes(p.place_id || p.id)) })}>
+                    <Ionicons name="heart" size={24} color="#000" />
+                    <Text style={styles.botaoTextoBarra}>Favoritos</Text>
+                </TouchableOpacity>
+            </LinearGradient>
+        </SafeAreaView>
+    );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff'
-  },
-  Topo: {
-    width: '100%',
-    backgroundColor: '#FB8837',
-    alignItems: 'center',
-    paddingTop: 50,
-    paddingBottom: 40,
-    borderBottomLeftRadius: 100,
-    borderBottomRightRadius: 100,
-    position: 'relative',
-  },
-  Pesquisar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#fff',
-    borderRadius: 25,
-    width: '80%',
-    height: 40,
-    paddingHorizontal: 10,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-    marginTop: 15,
-  },
-  botaoVoltar: {
-    position: 'absolute',
-    top: 40,
-    left: 20
-  },
-  titulo: {
-    fontSize: 25,
-    fontWeight: 'bold',
-    color: '#000',
-    marginTop: 5,
-  },
-  searchIcon: {
-    marginLeft: 5
-  },
-  input: {
-    flex: 1,
-    fontStyle: 'italic',
-    color: '#333'
-  },
-  listaContainer: {
-    flex: 1,
-    width: '100%'
-  },
-  listaConteudo: {
-    padding: 20,
-    paddingBottom: 100
-  },
-  card: {
-    flexDirection: 'row',
-    backgroundColor: '#f8f8f8',
-    borderRadius: 15,
-    padding: 15,
-    marginBottom: 15,
-    alignItems: 'center',
-    elevation: 3
-  },
-  imagemPlaceholder: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: '#fff',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 15
-  },
-  info: {
-    flex: 1
-  },
-  nome: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333'
-  },
-  descricao: {
-    fontSize: 14,
-    color: '#666'
-  },
-  botaoFavorito: {
-    padding: 5
-  },
-  botaoMais: {
-    backgroundColor: '#FB8837',
-    paddingVertical: 12,
-    paddingHorizontal: 18,
-    borderRadius: 25,
-    alignSelf: 'center',
-  },
-  textoMais: {
-    color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 16
-  },
-  barra: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    backgroundColor: '#FB8837',
-    width: '100%',
-    height: 90,
-    marginTop: 'auto',
-  },
-  botaoItem: {
-    alignItems: 'center'
-  },
-  botaoTextoBarra: {
-    fontSize: 12,
-    color: '#000',
-    marginTop: 3
-  }
+    loadingContainer: { 
+        flex: 1, 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        backgroundColor: '#fff' },
+    loadingText: { 
+        marginTop: 10, 
+        color: '#666'
+    },
+    container: { 
+        flex: 1, 
+        backgroundColor: '#fff' 
+    },
+    Topo: { 
+        width: '100%', 
+        alignItems: 'center', 
+        paddingTop: 50, 
+        paddingBottom: 40, 
+        borderBottomLeftRadius: 100, 
+        borderBottomRightRadius: 100 
+    },
+    Pesquisar: { 
+        flexDirection: 'row', 
+        alignItems: 'center', 
+        backgroundColor: '#fff', 
+        borderRadius: 25, 
+        width: '80%', 
+        height: 40, 
+        paddingHorizontal: 10, 
+        marginTop: 15, 
+        elevation: 3 
+    },
+    botaoVoltar: { 
+        position: 'absolute', 
+        top: 40, 
+        left: 20 
+    },
+    titulo: { 
+        fontSize: 25, 
+        fontWeight: 'bold', 
+        color: '#000', 
+        marginTop: 5 
+    },
+    searchIcon: { 
+        marginLeft: 5 
+    },
+    input: { 
+        flex: 1, 
+        fontStyle: 'italic', 
+        color: '#333' 
+    },
+    listaContainer: { 
+        flex: 1, 
+        width: '100%' 
+    },
+    listaConteudo: { 
+        padding: 20, 
+        paddingBottom: 100 
+    },
+    card: { 
+        flexDirection: 'row', 
+        backgroundColor: '#f8f8f8', 
+        borderRadius: 15, 
+        padding: 15, 
+        marginBottom: 15, 
+        alignItems: 'center', 
+        elevation: 3 },
+    imagemCiculo: { 
+        width: 60, 
+        height: 60, 
+        borderRadius: 30, 
+        overflow: 'hidden', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        backgroundColor: 'transparent' 
+    },
+    info: { 
+        flex: 1 
+    },
+    nome: { 
+        fontSize: 18, 
+        fontWeight: 'bold', 
+        color: '#333', 
+        marginBottom: 3 
+    },
+    endereco: { 
+        fontSize: 12, 
+        color: '#888', 
+        fontStyle: 'italic' 
+    },
+    botaoFavoritoTouch: { 
+        marginLeft: 8, 
+        padding: 6, 
+        borderRadius: 24 
+    },
+    favOutline: { 
+        width: 36, 
+        height: 36, 
+        borderRadius: 18, 
+        borderWidth: 1.5, 
+        borderColor: '#FB8837', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        backgroundColor: '#fff' 
+    },
+    favGradient: { 
+        width: 36, 
+        height: 36, 
+        borderRadius: 18, 
+        justifyContent: 'center', 
+        alignItems: 'center' 
+    },
+    botaoMais: { 
+        borderRadius: 25, 
+        alignSelf: 'center', 
+        marginTop: 10, 
+        paddingVertical: 12, 
+        paddingHorizontal: 18 
+    },
+    textoMais: { 
+        color: '#fff', 
+        fontWeight: 'bold', 
+        fontSize: 16 
+    },
+    semResultados: { 
+        alignItems: 'center', 
+        justifyContent: 'center', 
+        padding: 40 
+    },
+    semResultadosTexto: { 
+        textAlign: 'center', 
+        color: '#666', 
+        marginTop: 10, 
+        fontSize: 16, 
+        lineHeight: 24 
+    },
+    barra: { 
+        flexDirection: 'row', 
+        justifyContent: 'space-around', 
+        alignItems: 'center', 
+        width: '100%', 
+        height: 100, 
+        marginTop: 'auto', 
+        borderTopLeftRadius: 20, 
+        borderTopRightRadius: 20 
+    },
+    botaoItem: { 
+        alignItems: 'center', 
+        padding: 10 
+    },
+    botaoTextoBarra: { 
+        fontSize: 12, 
+        color: '#000', 
+        marginTop: 3, 
+        fontWeight: '500' 
+    }
 });
